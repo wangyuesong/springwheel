@@ -8,6 +8,7 @@ import org.litespring.beans.factory.BeanDefinitionStoreException;
 import org.litespring.beans.factory.BeanFactory;
 import org.litespring.beans.factory.support.DefaultBeanFactory;
 import org.litespring.beans.factory.xml.XmlBeanDefinitionReader;
+import org.litespring.core.io.support.ClassPathResource;
 import org.litespring.service.v1.PetStoreService;
 
 import static org.junit.Assert.*;
@@ -25,7 +26,7 @@ public class BeanFactoryTest {
     // Read a bean definition, get it's definition and create one bean
     @Test
     public void testGetBean() {
-        xmlBeanDefinitionReader.loadBeanDefinition("petstore-v1.xml");
+        xmlBeanDefinitionReader.loadBeanDefinition(new ClassPathResource("petstore-v1.xml"));
 
         BeanDefinition beanDefinition = factory.getBeanDefinition("petStore");
         assertEquals("org.litespring.service.v1.PetStoreService", beanDefinition.getBeanClassName());
@@ -38,7 +39,7 @@ public class BeanFactoryTest {
     // Should throw bean creation exception
     @Test
     public void testInvalidBean() {
-        xmlBeanDefinitionReader.loadBeanDefinition("petstore-v1.xml");
+        xmlBeanDefinitionReader.loadBeanDefinition(new ClassPathResource("petstore-v1.xml"));
         try {
             factory.getBean("invalidBeanDefinition");
         } catch (BeanCreationException b) {
@@ -50,7 +51,7 @@ public class BeanFactoryTest {
     @Test
     public void testInvalidXML() {
         try {
-            xmlBeanDefinitionReader.loadBeanDefinition("asd-v1.xml");
+            xmlBeanDefinitionReader.loadBeanDefinition(new ClassPathResource("asd-v1.xml"));
         } catch (BeanDefinitionStoreException b) {
             return;
         }
