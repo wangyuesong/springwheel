@@ -8,14 +8,12 @@ import org.litespring.core.io.support.ClassPathResource;
 
 // Glue: read xml and get bean functions
 public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
-    private DefaultBeanFactory factory;
-
     public ClassPathXmlApplicationContext(String configFile) {
         super(configFile);
     }
 
     protected Resource getResourceByPath(String configFile) {
-        return new ClassPathResource(configFile);
+        return new ClassPathResource(configFile, this.getBeanClassLoader());
     }
 
     public Object getBean(String beanId) {

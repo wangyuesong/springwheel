@@ -7,13 +7,19 @@ import java.io.InputStream;
 
 public class ClassPathResource implements Resource {
     private String configFilePath;
+    private ClassLoader classLoader = ClassUtils.getDefaultClassLoader();
+
+    public ClassPathResource(String s, ClassLoader classLoader) {
+        this.configFilePath = s;
+        this.classLoader = classLoader;
+    }
 
     public ClassPathResource(String s) {
         configFilePath = s;
     }
 
     public InputStream getInputStream() {
-        ClassLoader cl = ClassUtils.getDefaultClassLoader();
+        ClassLoader cl = this.classLoader;
         return cl.getResourceAsStream(configFilePath);
     }
 }
