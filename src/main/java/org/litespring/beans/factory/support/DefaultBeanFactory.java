@@ -9,7 +9,8 @@ import org.litespring.beans.factory.BeanFactory;
 import org.litespring.beans.factory.config.ConfigurableBeanFactory;
 import org.litespring.util.ClassUtils;
 
-public class DefaultBeanFactory implements ConfigurableBeanFactory, BeanDefinitionRegistry {
+public class DefaultBeanFactory extends DefaultSingletonBeanRegistry
+        implements ConfigurableBeanFactory, BeanDefinitionRegistry {
 
     private ClassLoader classLoader;
 
@@ -27,11 +28,25 @@ public class DefaultBeanFactory implements ConfigurableBeanFactory, BeanDefiniti
         this.beanDefinitionMap.put(id, beanDefinition);
     }
 
+    // get bean by id, first read def
+    // then depends on if it's singleton or not
+    // read from different map
     public Object getBean(String beanID) {
         BeanDefinition bd = this.getBeanDefinition(beanID);
-        if(bd == null){
+        if(bd == null) {
             throw new BeanCreationException("Bean Definition does not exist");
         }
+        if (bd.isSingleton()) {
+            if (this.getSingleton(beanID) == null) {
+                this.registerSingleton(beanID, this.createBean(bd));
+            }
+            return this.getSingleton(beanID);
+        }
+        return createBean(bd);
+    }
+
+    // Create a bean based on def
+    private Object createBean(BeanDefinition bd) {
         ClassLoader cl = this.getBeanClassLoader();
         String beanClassName = bd.getBeanClassName();
         try {
