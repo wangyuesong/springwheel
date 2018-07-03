@@ -8,6 +8,7 @@ public class PropertyValue {
 
     private boolean converted = false;
 
+    // Real bean object ????
     private Object convertedValue;
 
     public PropertyValue(String name, Object value) {

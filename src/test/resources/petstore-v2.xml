@@ -9,5 +9,6 @@
         <property name="accountDao" ref="accountDao"/>
         <property name="itemDao" ref="itemDao"/>
         <property name="petstoreName" value="shabi"/>
+        <property name="version" value="2"/>
     </bean>
 </beans>

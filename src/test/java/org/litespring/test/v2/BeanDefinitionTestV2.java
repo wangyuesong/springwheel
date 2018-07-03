@@ -20,7 +20,7 @@ public class BeanDefinitionTestV2 {
 
         BeanDefinition beanDefinition = beanDefinitionRegistry.getBeanDefinition("petStore");
 
-        assertEquals(3, beanDefinition.getPropertyValues().size());
+        assertEquals(4, beanDefinition.getPropertyValues().size());
 
         assertTrue(beanDefinition.getPropertyValues().stream().filter(pv -> pv.getName().equals("itemDao")).findFirst().get().getValue() instanceof RuntimeBeanReference);
 

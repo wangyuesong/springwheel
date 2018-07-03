@@ -1,12 +1,19 @@
 package org.litespring.beans.factory.support;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.litespring.beans.BeanDefinition;
+import org.litespring.beans.PropertyValue;
+import org.litespring.beans.TypeConverter;
 import org.litespring.beans.factory.BeanCreationException;
-import org.litespring.beans.factory.BeanFactory;
 import org.litespring.beans.factory.config.ConfigurableBeanFactory;
+import org.litespring.beans.support.BeanDefinitionValueResolver;
+import org.litespring.beans.support.SimpleTypeConverter;
 import org.litespring.util.ClassUtils;
 
 public class DefaultBeanFactory extends DefaultSingletonBeanRegistry
@@ -47,6 +54,47 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry
 
     // Create a bean based on def
     private Object createBean(BeanDefinition bd) {
+        Object bean = ininitializeBean(bd);
+        populateBean(bd, bean);
+        return bean;
+    }
+
+    private void populateBean(BeanDefinition bd, Object bean) {
+        List<PropertyValue> pvs = bd.getPropertyValues();
+
+        if (pvs == null || pvs.isEmpty()) {
+            return;
+        }
+
+        BeanDefinitionValueResolver beanDefinitionResolver = new BeanDefinitionValueResolver(this);
+        TypeConverter converter = new SimpleTypeConverter();
+
+        try {
+            for (PropertyValue pv : pvs) {
+                String propertyName = pv.getName();
+                Object originalValue = pv.getValue();
+                Object resolvedValue = beanDefinitionResolver.resolveValueIfNecessary(originalValue);
+
+                // Get this resolved value, now we need to set the value on it
+                BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
+                PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
+                for (PropertyDescriptor pd: pds) {
+                    if (pd.getName().equals(propertyName)) {
+                        // Convert the read-from-xml value to bean's attribute type
+                        Object convertedValue = converter.convertIfNecessary(resolvedValue, pd.getPropertyType());
+                        pd.getWriteMethod().invoke(bean, convertedValue);
+                        break;
+                    }
+                 }
+            }
+        }
+        catch (Exception e) {
+            throw new BeanCreationException("Cannot resolve value for a bean");
+        }
+
+    }
+
+    private Object ininitializeBean(BeanDefinition bd) {
         ClassLoader cl = this.getBeanClassLoader();
         String beanClassName = bd.getBeanClassName();
         try {
